@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>カウントダウンタイマージェネレーター｜Countdown Timer Generator</title>
+  <meta name="description" content="倒數計時器產生器(OBS可用)。카운트다운 시계 생성기。">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nanum+Gothic:wght@400;700&family=Zen+Maru+Gothic:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <script src="jscolor-2.5.0/jscolor.js"></script>
+  <script src="lottie.js"></script>
+</head>
+<body>
+  <div class="bg">
+    <video playsinline autoplay muted loop poster="img/background.png" id="bgvid">
+      <source src="video/background.mp4" type="video/mp4">
+    </video>
+  </div>
+  <!-- <div id="bm"></div> -->
+  <h1><a href="index.html"><img src="img/logo.svg" width="320" alt="Countdown!"></img></a></h1>
+  <div class="content">
+    <form action="timer.html" method="get" id="form" target="_blank">
+      <div class="inputs">
+        <label>言語｜Language
+          <select name="lang" id="lang" onchange="changeLanguage()">
+            <option value="jp" selected>日本語</option>
+            <option value="zh">中文</option>
+            <option value="eng">English</option>
+            <option value="kr">한국어</option>
+          </select>
+        </label>
+        <label><span class="text_lang">ラベルの文字</span>
+          <input type="text" name="label_text" id="label_text" value="配信まであと" size="23">
+        </label>
+        <div class="label"><span class="text_lang">ラベルの文字色</span>
+          <input type="color" name="title_color" id="title_color" value="#ffffff">
+        </div>
+        <div class="label"><span class="text_lang">ラベルの背景色</span>
+          <input type="color" name="label_color" id="label_color" value="#ff5a76">
+        </div>
+        <label><span class="text_lang">背景の色</span>
+          <input name="bg_color" id="bg_color" data-jscolor="{position:'bottom',height:80,backgroundColor:'#fff'}">
+        </label>
+        <label><span class="text_lang">終了時間</span>
+          <input type="date" name="the_date" id="the_date" value="">
+          <input type="time" name="the_time" id="the_time" value="">
+        </label>
+        <div class="label"><span class="text_lang">数字の色</span>
+          <input type="color" name="timer_color" id="timer_color" value="#ff5a76">
+        </div>
+        <div class="label"><span class="text_lang">文字の色</span>
+          <input type="color" name="text_color" id="text_color" value="#333333">
+        </div>
+        <label><span class="text_lang">終了時文字</span>
+          <input type="text" name="finish_text" id="finish_text" value="まもなく開始いたします" size="23">
+        </label>
+      </div>
+      <div id="buttons">
+        <button type="button" onclick="preview()"><span class="text_lang">更新</span></button>
+        <button type="reset" onclick="window.location.reload()"><span class="text_lang">リセット</span></button>
+        <button type="submit"><span class="text_lang">作成</span></button>
+      </div>
+    </form>
+
+     <div id="preview">
+    
+      <div class="wrap" id="wrap">
+        <p class="made" id="label">配信まであと</p>
+        <p id="counter">
+          <span id="hour"></span> <span id="hour_text">時間</span>
+          <span id="min"></span> <span id="min_text">分</span>
+          <span id="sec"></span> <span id="sec_text">秒</span>
+        </p>
+        <p id="goal"></p>
+      </div>
+      
+      <div class="wrap" id="wrap_end">
+        <p class="made" id="label_end">配信まであと</p>
+        <p id="counter_end">
+        </p>
+        <p id="goal_end"></p>
+      </div>
+     </div>
+  </div>
+
+  <script>
+    
+    //#bm --bg setting
+    const bg_animation = bodymovin.loadAnimation({
+      container: document.getElementById('bm'),
+      renderer:'svg',
+      loop:true,
+      autoplay:true,
+      path:'data.json'
+    })
+
+    // default time (form)
+    const set_goal = new Date();
+    set_goal.setDate( set_goal.getDate() );
+    set_goal.setHours( set_goal.getHours()+2 );
+
+      //date
+      const the_date=document.getElementById('the_date');
+      const default_date= set_goal.getFullYear()+'-'+let_num_00(set_goal.getMonth()+1)+'-'+set_goal.getDate();
+      the_date.value = default_date ;
+      
+      //time
+      const the_time=document.getElementById('the_time');
+      const default_time= let_num_00(set_goal.getHours())+':'+let_num_00(set_goal.getMinutes());
+      the_time.value = default_time;
+
+    //default text 
+    const year = set_goal.getFullYear();
+    const month = let_num_00(set_goal.getMonth()+1);
+    const date = set_goal.getDate();
+    let weekday = set_goal.getDay();
+    let week = ["日","月","火","水","木","金","土"];
+    let day = week[weekday];
+    const hour =set_goal.getHours();
+    const min =set_goal.getMinutes();
+
+      //(counting one)
+      const goal = document.getElementById('goal');
+      goal.textContent=year+'/'+month +'/'+date+'('+day+')'+let_num_00(hour)+':'+let_num_00(min);
+      
+      //(finished one)
+      const counter_end = document.getElementById('counter_end');
+      counter_end.textContent="まもなく開始いたします";
+      counter_end.style.fontSize='20px';
+      counter_end.style.lineHeight='40px';
+      const goal_end=document.getElementById('goal_end');
+      goal_end.textContent=year+'/'+month +'/'+date+'('+day+')'+let_num_00(hour)+':'+let_num_00(min);
+    
+    //color picker
+    const colorPicker= new JSColor('#bg_color',{format:'rgba'});
+
+    //preview button
+    function preview(){
+      console.log('preview btn clicked');
+
+      text_update();
+      design_update();
+      time_update();
+
+    }
+
+    function text_update(){
+      const label_text = document.getElementById('label_text').value;
+      const finish_text = document.getElementById('finish_text').value;
+      const label= document.getElementById('label');
+      const label_end= document.getElementById('label_end');
+      const counter_end=document.getElementById('counter_end');
+
+      //label text
+      label.textContent=label_text;
+      label_end.textContent=label_text;
+      //finish text
+      counter_end.textContent=finish_text;
+    }
+
+    function design_update(){
+
+      //color of background
+        const wrap = document.getElementById('wrap');
+        const wrap_end = document.getElementById('wrap_end');
+        const ch=document.getElementById('bg_color').jscolor.channels;
+        const rgba=[Math.floor(ch.r),Math.floor(ch.g),Math.floor(ch.b),Math.floor(ch.a*100)/100];
+        const bgColor='rgba'+'('+rgba[0]+','+rgba[1]+','+rgba[2]+','+rgba[3]+')';
+        wrap.style.backgroundColor = bgColor;
+        wrap_end.style.backgroundColor = bgColor;
+      
+      //color of label
+        const label = document.getElementById('label');
+        const label_end = document.getElementById('label_end');
+        const title_color = document.getElementById('title_color').value;
+        const label_color = document.getElementById('label_color').value;
+        label.style.backgroundColor=label_color;
+        label_end.style.backgroundColor=label_color;
+        label.style.color=title_color;
+        label_end.style.color=title_color;
+
+      //color of number
+        const hour=document.getElementById('hour');
+        const min=document.getElementById('min');
+        const sec=document.getElementById('sec');
+        const timer_color = document.getElementById('timer_color').value;
+        hour.style.color=timer_color;
+        min.style.color=timer_color;
+        sec.style.color=timer_color;
+
+      //color of text
+        const counter=document.getElementById('counter');
+        const counter_end=document.getElementById('counter_end');
+        const goal=document.getElementById('goal');
+        const goal_end=document.getElementById('goal_end');
+        const text_color = document.getElementById('text_color').value;
+        counter.style.color=text_color;
+        counter_end.style.color=text_color;
+        goal.style.color=text_color;
+        goal_end.style.color=text_color;
+
+    }
+
+    function time_update(){
+        const the_date = document.getElementById('the_date').value;
+        const the_time = document.getElementById('the_time').value;
+        const goal=document.getElementById('goal');
+        const goal_end=document.getElementById('goal_end');
+      //set_goal update
+        const time_str = the_date.replace(/-/g,',')+','+the_time.replace(/:/g,',');
+        const time_str_arr = time_str.split(",");
+        const time=[]; 
+        
+        for (let i =0; i<time_str_arr.length;i++){
+          time.push(parseInt(time_str_arr[i]));
+          console.log(time);
+        }
+
+        const yyyy = time[0];
+        const mm = time[1]-1;
+        const dd = time[2];
+        const hr = time[3];
+        const m = time[4];
+
+        set_goal.setFullYear(yyyy,mm,dd);
+        set_goal.setHours(hr);
+        set_goal.setMinutes(m);
+        weekday = set_goal.getDay();
+        day = week[weekday];
+
+        goal.textContent=the_date.replace(/-/g,'/')+'('+day+')'+the_time;
+        goal_end.textContent=the_date.replace(/-/g,'/')+'('+day+')'+the_time;
+    }
+
+    // Language
+    function changeLanguage(){
+      const lang= document.getElementById('lang').value;
+      //form
+      const label_text = document.getElementById('label_text');
+      const finish_text = document.getElementById('finish_text');
+      const text_lang = document.getElementsByClassName('text_lang');
+      //DOM
+      const hour_text = document.getElementById('hour_text');
+      const min_text = document.getElementById('min_text');
+      const sec_text = document.getElementById('sec_text');
+      
+      switch(lang){
+        case 'jp':
+        week = ["日","月","火","水","木","金","土"];//jp
+        hour_text.textContent='時間';
+        min_text.textContent='分';
+        sec_text.textContent='秒';
+        label_text.value='配信まであと';
+        finish_text.value='まもなく開始いたします';
+        const text_jp=['ラベルの文字','ラベルの文字色','ラベルの背景色','背景の色','終了時間','数字の色','文字の色','終了時文字','更新','リセット','作成'];
+        for (let i=0;i<text_lang.length;i++){
+          text_lang[i].textContent=text_jp[i];
+        }
+        preview();
+        break;
+        
+        case 'zh':
+        week = ["日","一","二","三","四","五","六"];//zh
+        hour_text.textContent='小時';
+        min_text.textContent='分';
+        sec_text.textContent='秒';
+        label_text.value='距離直播開始還有';
+        finish_text.value='直播即將開始';
+        const text_zh=['標題文字','標題字色','標題顏色','背景顏色','結束時間','數字顏色','文字顏色','結束時文字','更新預覽','重設','生成'];
+        for (let i=0;i<text_lang.length;i++){
+          text_lang[i].textContent=text_zh[i];
+        }
+        preview();
+        break;
+
+        case 'eng':
+        week = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];//eng
+        hour_text.textContent='hr';
+        min_text.textContent='min';
+        sec_text.textContent='s';
+        label_text.value='Until Live Begins';
+        finish_text.value='Live is about to start';
+        const text_eng=['Label Text','Label Text Color','Label Color','BG Color','End Time','Number Color','Text Color','Ending Text','Preview','Reset','Generate'];
+        for (let i=0;i<text_lang.length;i++){
+          text_lang[i].textContent=text_eng[i];
+        }
+        preview();
+        break;
+
+        case 'kr':
+        week = ["일","월","화","수","목","금","토"];//kr
+        hour_text.textContent='시간';
+        min_text.textContent='분';
+        sec_text.textContent='초';
+        label_text.value='생방송 까지 앞으로';
+        finish_text.value='생방송이 곧 시작됩니다';
+        const text_kr=[ '라벨 문자','라벨 문자 색', '라벨배경 색', '배경 색', '끝 시간', '숫자 색', '문자 색', '끝 문자', '미리보기','리셋', '만들기'];
+        for (let i=0;i<text_lang.length;i++){
+          text_lang[i].textContent=text_kr[i];
+        }
+        preview();
+        break;
+      }
+      if(lang=='kr'){
+        document.getElementById('wrap').style.fontFamily='Nanum Gothic Coding';
+        document.getElementById('wrap_end').style.fontFamily='Nanum Gothic Coding';
+        }else{
+          document.getElementById('wrap').style.fontFamily='Zen Maru Gothic';
+          document.getElementById('wrap_end').style.fontFamily='Zen Maru Gothic';
+        }
+    }
+      
+    //double digits
+    function let_num_00(num){
+      let fixed_num = new Intl.NumberFormat(
+      undefined, {
+      minimumIntegerDigits: 2,
+      useGrouping:false
+      }
+      ).format(num);
+      return fixed_num;
+    }
+
+    //shift ms to sec/min/day/month
+    function countdown(xDay){
+      let now = new Date();
+      let rest = xDay.getTime()-now.getTime();
+      let sec = Math.floor(rest/1000)%60;
+      let min = Math.floor(rest/1000/60)%60;
+      let hour = Math.floor(rest/1000/60/60)%24;
+      let day = Math.floor(rest/1000/60/60/24);
+      let count = [day,hour,min,sec];
+      return count;
+    }
+
+    //update number of time
+    function recalc(){
+        let count = countdown(set_goal);
+
+        let day = count[0];
+        let hour = count[1];
+        let min = count[2];
+        let sec = count[3];
+        
+        let getHour = document.getElementById('hour');
+        let getMin = document.getElementById('min');
+        let getSec = document.getElementById('sec');
+
+        getHour.textContent=let_num_00(hour); //常に二桁
+        getMin.textContent=let_num_00(min); //常に二桁
+        getSec.textContent=let_num_00(sec); //常に二桁
+        // getHour.textContent=hour;  //時間によって桁数を更新
+        // getMin.textContent=min;  //時間によって桁数を更新
+        // getSec.textContent=sec;  //時間によって桁数を更新
+
+        refresh();
+
+    }
+
+    //update time per 500 ms
+    function refresh(){
+      window.setTimeout(recalc,1000);
+    }
+
+    recalc();
+    
+  </script>
+</body>
+</html>

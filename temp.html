@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Timer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nanum+Gothic:wght@400;700&family=Zen+Maru+Gothic:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    *{
+      padding: 0;
+      margin: 0;
+      box-sizing: border-box;
+      font-family: 'Zen Maru Gothic','Nanum Gothic', sans-serif;
+      font-weight: bold;
+    }
+    body{
+      display: flex;
+      justify-content: center;
+    }
+    .wrap{
+      display: flex;
+      flex-direction: column;
+      gap:0.6rem;
+      justify-content: center;
+      align-items: center;
+      border-radius: 30px;
+      width: 600px;
+      height: 300px;
+      background-color: #fff;
+    }
+    p{
+      letter-spacing: 3px;
+      font-size: 30px;
+      color: #333333;
+    }
+    #goal{
+      letter-spacing: 5px;
+      font-size: 28px;
+    }
+    .label{
+      font-size: 32px;
+      color: #FFF;
+      background-color: #ff5a76;
+      border-radius: 100px;
+      padding: 10px 50px;
+    }
+
+    #hour,#min,#sec{
+      display: inline-block;
+      width: 64px;
+      color: #ff5a76;
+      font-size: 60px;
+      margin-bottom: -16px;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap" id="wrap">
+    <p class="label" id="label"></p>
+    <p id="counter">
+      <span id="hour"></span> <span id="hour_text"></span>
+      <span id="min"></span> <span id="min_text"></span>
+      <span id="sec"></span> <span id="sec_text"></span>
+    </p>
+    <p id="goal"></p>
+  </div>
+
+
+  <script>
+    
+
+  //setting--------------------------------------------------
+   
+   
+    //Language
+      const lang = 'jp'; //jp zh eng kr 
+
+    //Text
+      const set_label_text = 'your label text'; //less than 22 character in halfwidth
+      const set_finish_text = 'your finish text'; //less than 20 character in halfwidth
+
+    // Colors
+    // format: #ffffff , rgb(255,255,255) , rgba(255,255,255,1)
+      const set_title_color = 'laber text color'; 
+      const set_label_color = 'laber bg color'; 
+      const set_bg_color = 'timer bg color'; 
+      const set_timer_color = 'number color';
+      const set_text_color = 'text color';
+
+    //time (must be future and less than 24hrs)
+      const set_the_date = '2022-10-21'; //format 2000-00-00
+      const set_the_time = '19:49'; //format 00:00
+
+
+   //----------------------------------------------------------
+
+    const label = document.getElementById('label');
+    const wrap = document.getElementById('wrap');
+    const counter = document.getElementById('counter');
+    const hour = document.getElementById('hour');
+    const min = document.getElementById('min');
+    const sec = document.getElementById('sec');
+    const getGoal = document.getElementById('goal');
+
+    label.textContent=set_label_text;
+    label.style.color=set_title_color
+    label.style.backgroundColor=set_label_color;
+    wrap.style.backgroundColor=set_bg_color;
+    counter.style.color=set_text_color;
+    getGoal.style.color=set_text_color;
+    hour.style.color=set_timer_color;
+    min.style.color=set_timer_color;
+    sec.style.color=set_timer_color;
+    
+    const time_str = set_the_date.replace(/-/g,',')+','+set_the_time.replace(/:/g,',');
+    const time_str_arr = time_str.split(",");
+    const time=[]; 
+    
+    for (let i =0; i<time_str_arr.length;i++){
+      time.push(parseInt(time_str_arr[i]));
+      console.log(time);
+    }
+
+    const yyyy = time[0];
+    const mm = time[1]-1;
+    const dd = time[2];
+    const hr = time[3];
+    const m = time[4];
+
+    const goal = new Date(yyyy,mm,dd,hr,m);
+
+    const year = goal.getFullYear();
+    const month = let_num_00(goal.getMonth()+1);
+    const date = goal.getDate();
+    const weekday = goal.getDay()
+    let week;
+    let day;
+    const get_hour =goal.getHours();
+    const get_min =goal.getMinutes();
+
+      //switch lang
+      const hour_text = document.getElementById('hour_text');
+      const min_text = document.getElementById('min_text');
+      const sec_text = document.getElementById('sec_text');
+    switch(lang){
+        case 'jp':
+        week = ["日","月","火","水","木","金","土"];//jp
+        hour_text.textContent='時間';
+        min_text.textContent='分';
+        sec_text.textContent='秒';
+        day = week[weekday];
+        break;
+        
+        case 'zh':
+        week = ["日","一","二","三","四","五","六"];//zh
+        hour_text.textContent='小時';
+        min_text.textContent='分';
+        sec_text.textContent='秒';
+        day = week[weekday];
+        break;
+
+        case 'eng':
+        week = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];//eng
+        hour_text.textContent='hr';
+        min_text.textContent='min';
+        sec_text.textContent='s';
+        day = week[weekday];
+        break;
+
+        case 'kr':
+        week = ["일","월","화","수","목","금","토"];//kr
+        hour_text.textContent='시간';
+        min_text.textContent='분';
+        sec_text.textContent='초';
+        day = week[weekday];
+        break;
+      }
+      if(lang=='kr'){
+        document.getElementById('wrap').style.fontFamily='Nanum Gothic Coding';
+        }else{
+          document.getElementById('wrap').style.fontFamily='Zen Maru Gothic';
+        }
+
+    //print goal    
+    
+    getGoal.textContent=year+'/'+month +'/'+date+'('+day+')'+let_num_00(get_hour)+':'+let_num_00(get_min);
+
+    function countdown(xDay){
+      let now = new Date();
+      let rest = xDay.getTime()-now.getTime();
+      let sec = Math.floor(rest/1000)%60;
+      let min = Math.floor(rest/1000/60)%60;
+      let hour = Math.floor(rest/1000/60/60)%24;
+      let day = Math.floor(rest/1000/60/60/24);
+      let count = [day,hour,min,sec];
+      return count;
+    }
+    
+    function let_num_00(num){
+      let fixed_num = new Intl.NumberFormat(
+      undefined, {
+      minimumIntegerDigits: 2,
+      useGrouping:false
+      }
+      ).format(num);
+      return fixed_num;
+    }
+
+    function recalc(){
+        let count = countdown(goal);
+      
+      if(count[1]<=0 && count[2]<=0 && count[3]<=0){
+        console.log('time up');
+        let counter = document.getElementById('counter');
+        counter.textContent=set_finish_text;
+        counter.style.fontSize='40px';
+        counter.style.lineHeight='80px';
+      }else{
+        let day = count[0];
+        let hour = count[1];
+        let min = count[2];
+        let sec = count[3];
+        
+        let getHour = document.getElementById('hour');
+        let getMin = document.getElementById('min');
+        let getSec = document.getElementById('sec');
+
+        getHour.textContent=let_num_00(hour); 
+        getMin.textContent=let_num_00(min); 
+        getSec.textContent=let_num_00(sec); 
+
+        refresh();
+      }
+    }
+
+    function refresh(){
+      window.setTimeout(recalc,1000);
+    }
+
+    recalc();
+    
+  </script>
+</body>
+</html>
